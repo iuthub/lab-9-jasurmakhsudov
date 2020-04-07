@@ -1,5 +1,5 @@
 <?php
-
+use App\Post;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,6 +19,11 @@ Route::get('/', [
 Route::get('post/{id}', [
     'uses' => 'PostController@getPost',
     'as' => 'blog.post'
+]);
+
+Route::get('like/{id}', [
+    'uses' => 'PostController@getLikePost',
+    'as' => 'blog.post.like'
 ]);
 
 Route::get('about', function () {
@@ -45,6 +50,19 @@ Route::group(['prefix' => 'admin'], function() {
         'uses' => 'PostController@getAdminEdit',
         'as' => 'admin.edit'
     ]);
+/*
+    Route::get('delete/{id}', [
+        'uses ' => 'PostController@getAdminDelete ', 
+        'as' => 'admin.delete'
+    ]);
+*/
+    Route::get('delete/{id}', function ($id) {
+        $post = Post::find($id); 
+        $post->likes()->delete(); 
+        $post->tags()->detach(); 
+        $post->delete();
+        return redirect()->route('admin.index')->with('info', 'Post deleted!');
+    })->name('admin.delete');
 
     Route::post('edit', [
         'uses' => 'PostController@postAdminUpdate',
